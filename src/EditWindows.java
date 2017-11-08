@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.TimerTask;
 
 public class EditWindows extends JFrame implements ActionListener {
     private DisplayWindows displayWindows;
@@ -18,22 +19,30 @@ public class EditWindows extends JFrame implements ActionListener {
 
     private JButton setFullscreenButton;
 
-    EditWindows(DisplayWindows displayWindows) {
+    private Timer timer;
+    private Cooldown cooldown;
+    private JLabel timerLabel;
+
+    EditWindows(DisplayWindows displayWindow) {
         this.setTitle("Escape Game : Mode d'édition");
         this.setSize(1000, 650);
         this.setMinimumSize(new Dimension(750, 500));
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        this.displayWindows = displayWindows;
+        this.displayWindows = displayWindow;
 
         this.initComponents();
         this.displayComponents();
         this.add(panel);
 
+        createTimer();
+
         this.setVisible(true);
     }
 
     private void initComponents() {
+        cooldown = new Cooldown();
+
         startButton = new JButton("Start Timer");
         startButton.addActionListener(this);
 
@@ -57,6 +66,9 @@ public class EditWindows extends JFrame implements ActionListener {
 
         setFullscreenButton = new JButton("Set Fullscreen");
         setFullscreenButton.addActionListener(this);
+
+        timerLabel = new JLabel("Retour Timer");
+        timerLabel.setHorizontalAlignment(JLabel.CENTER);
     }
     private void displayComponents() {
         panel = new JPanel();
@@ -86,7 +98,7 @@ public class EditWindows extends JFrame implements ActionListener {
         // Timer
 
         constraints.gridx = 0;
-        constraints.gridwidth = 4;
+        constraints.gridwidth = 3;
 
         constraints.gridy += constraints.gridheight;
         panel.add(startButton, constraints);
@@ -99,21 +111,55 @@ public class EditWindows extends JFrame implements ActionListener {
 
         constraints.gridx += constraints.gridwidth;
         panel.add(setFullscreenButton, constraints);
+
+        constraints.gridx += constraints.gridwidth;
+        panel.add(timerLabel, constraints);
+    }
+
+    // TODO: Remove this duplicated code.
+    private void createTimer() {
+        ActionListener task = evt -> {
+            if (!cooldown.decreaseSeconds()) {
+                timerLabel.setText("Fin du temps imparti");
+                timer.stop();
+            } else {
+                timerLabel.setText(cooldown.toString());
+            }
+        };
+        timer = new Timer(1000, task);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == startButton) {
+            cooldown.setMinutes(Integer.parseInt(startTime.getText()));
             displayWindows.startTimer(startTime.getText());
+            timer.start();
         }
         else if (e.getSource() == resetButton) {
             displayWindows.resetTimer();
+            timer.stop();
+            cooldown.reset();
+            timerLabel.setText(cooldown.toString());
         }
         else if (e.getSource() == pauseButton) {
             displayWindows.pauseTimer();
+            timer.stop();
         }
         else if (e.getSource() == sendButton) {
             displayWindows.displayHint(message.getText());
+
+            sendButton.setBackground(Color.red);
+            sendButton.setEnabled(false);
+
+            java.util.Timer hintTimer = new java.util.Timer();
+            hintTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    sendButton.setBackground(null);
+                    sendButton.setEnabled(true);
+                }
+            }, DisplayWindows.HINT_TIME_IN_MILLIS);
         }
         else if (e.getSource() == setFullscreenButton) {
             Main.showOnSecondScreen(displayWindows);

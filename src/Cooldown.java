@@ -10,7 +10,8 @@ public class Cooldown {
         reset();
     }
 
-    public void setMinutes(int minutes) {
+    void setMinutes(int minutes)
+    {
         this.minutes = minutes;
     }
 

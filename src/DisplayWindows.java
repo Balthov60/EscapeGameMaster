@@ -15,6 +15,8 @@ class DisplayWindows extends JFrame {
 
     private Boolean isHintActivated = false;
 
+    static final int HINT_TIME_IN_MILLIS = 15000;
+
     DisplayWindows() {
         this.setTitle("Escape Game");
         this.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -114,7 +116,7 @@ class DisplayWindows extends JFrame {
                 displayTimer();
                 isHintActivated = false;
             }
-        }, 10000);
+        }, HINT_TIME_IN_MILLIS);
     }
     private void displayText() {
         this.getContentPane().removeAll();

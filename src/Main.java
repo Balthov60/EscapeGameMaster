@@ -5,10 +5,14 @@ public class Main {
 
     public static void main(String[] args) {
         DisplayWindows displayWindows = new DisplayWindows();
+
+        // Disable this to test code on single screen.
+        showOnSecondScreen(displayWindows);
+        displayWindows.setAlwaysOnTop(true);
+
         new EditWindows(displayWindows);
     }
 
-    //TODO : Test IF Working.
     static void showOnSecondScreen(JFrame frame)
     {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -16,11 +20,15 @@ public class Main {
 
         if(2 < gs.length)
         {
-            gs[2].setFullScreenWindow(frame);
+            Rectangle bounds = gs[2].getDefaultConfiguration().getBounds();
+            frame.setSize(bounds.width, bounds.height);
+            frame.setLocation(bounds.x, bounds.y);
         }
         else
         {
-            gs[1].setFullScreenWindow(frame);
+            Rectangle bounds = gs[1].getDefaultConfiguration().getBounds();
+            frame.setSize(bounds.width, bounds.height);
+            frame.setLocation(bounds.x, bounds.y);
         }
     }
 
