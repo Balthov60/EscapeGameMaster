@@ -1,15 +1,8 @@
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
-
 import javax.sound.sampled.*;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.TimerTask;
 
 class DisplayWindows extends JFrame {
@@ -143,7 +136,7 @@ class DisplayWindows extends JFrame {
                 try {
                     Clip clip = AudioSystem.getClip();
                     AudioInputStream inputStream = AudioSystem.getAudioInputStream(
-                            Main.class.getResourceAsStream("./res/hintNotification.wav"));
+                            getClass().getResource("/res/hintNotification.wav"));
                     clip.open(inputStream);
                     clip.start();
                 } catch (Exception e) {
