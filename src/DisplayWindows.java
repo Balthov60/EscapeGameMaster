@@ -1,7 +1,15 @@
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+
+import javax.sound.sampled.*;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.TimerTask;
 
 class DisplayWindows extends JFrame {
@@ -12,8 +20,6 @@ class DisplayWindows extends JFrame {
 
     private Cooldown cooldown;
     private Timer timer;
-
-    private Boolean isHintActivated = false;
 
     static final int HINT_TIME_IN_MILLIS = 15000;
 
@@ -102,10 +108,7 @@ class DisplayWindows extends JFrame {
     }
 
     void displayHint(String text) {
-        if (isHintActivated)
-            return;
-
-        isHintActivated = true;
+        playHintSound();
         hint.setText(text);
         displayText();
 
@@ -114,7 +117,6 @@ class DisplayWindows extends JFrame {
             @Override
             public void run() {
                 displayTimer();
-                isHintActivated = false;
             }
         }, HINT_TIME_IN_MILLIS);
     }
@@ -131,5 +133,23 @@ class DisplayWindows extends JFrame {
         this.getContentPane().add(timerText);
         this.repaint();
         this.revalidate();
+    }
+
+    private synchronized void playHintSound() {
+        new Thread(new Runnable() {
+            // The wrapper thread is unnecessary, unless it blocks on the
+            // Clip finishing; see comments.
+            public void run() {
+                try {
+                    Clip clip = AudioSystem.getClip();
+                    AudioInputStream inputStream = AudioSystem.getAudioInputStream(
+                            Main.class.getResourceAsStream("./res/hintNotification.wav"));
+                    clip.open(inputStream);
+                    clip.start();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 }
